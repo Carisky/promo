@@ -109,6 +109,7 @@ async function copySummary() {
 
 async function onSubmit(_event: FormSubmitEvent<any>) {
   created.value = null
+  showPreview.value = false
 
   const contact = contactLine.value.trim()
   if (!contact) return
@@ -132,11 +133,11 @@ async function onSubmit(_event: FormSubmitEvent<any>) {
     })
 
     created.value = res.request
-    showPreview.value = true
+    showPreview.value = false
 
     toast.add({
       title: 'Заявка создана',
-      description: 'Скопируйте текст и отправьте мне в Telegram — я отвечу и назову стоимость.',
+      description: 'Мы обработаем её в ближайшее время.',
       color: 'primary'
     })
   } catch (err: any) {

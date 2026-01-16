@@ -1,4 +1,5 @@
-import type { ServiceRequestInput, ServiceRequestRecord } from '~/shared/service-request'
+import type { ServiceRequestInput, ServiceRequestRecord, ServiceRequestStatus } from '~/shared/service-request'
+import { isServiceRequestStatus } from '~/shared/service-request'
 import type { ServiceRequest as ServiceRequestRow } from '@prisma/client'
 import { getPrisma } from '../utils/prisma'
 
@@ -6,13 +7,15 @@ export type ServiceRequestRepository = {
   create: (input: ServiceRequestInput) => Promise<ServiceRequestRecord>
   list: () => Promise<ServiceRequestRecord[]>
   getById: (id: string) => Promise<ServiceRequestRecord | null>
+  updateStatus: (id: string, status: ServiceRequestStatus) => Promise<ServiceRequestRecord | null>
 }
 
 function toRecord(row: ServiceRequestRow): ServiceRequestRecord {
+  const status = isServiceRequestStatus(row.status) ? row.status : 'new'
   return {
     id: row.id,
     createdAt: row.createdAt.toISOString(),
-    status: (row.status as ServiceRequestRecord['status']) ?? 'new',
+    status,
     model: row.model,
     issue: row.issue,
     contact: row.contact,
@@ -61,6 +64,19 @@ export function getServiceRequestRepository(): ServiceRequestRepository {
       const prisma = getPrisma()
       const row = await prisma.serviceRequest.findUnique({ where: { id } })
       return row ? toRecord(row) : null
+    },
+
+    async updateStatus(id, status) {
+      const prisma = getPrisma()
+      try {
+        const updated = await prisma.serviceRequest.update({
+          where: { id },
+          data: { status }
+        })
+        return toRecord(updated)
+      } catch {
+        return null
+      }
     }
   }
 }
