@@ -7,7 +7,12 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "server:start": "bash scripts/server.sh start",
+    "server:stop": "bash scripts/server.sh stop",
+    "server:restart": "bash scripts/server.sh restart",
+    "server:rebuild": "bash scripts/server.sh rebuild",
+    "server:status": "bash scripts/server.sh status"
   },
   "dependencies": {
     "@nuxt/ui": "^3.3.3",
