@@ -32,7 +32,6 @@ const created = ref<ServiceRequestRecord | null>(null)
 const showPreview = ref(false)
 
 const serviceItems = computed(() => [
-  { label: 'Не выбрано', value: '' },
   ...services.map(s => ({ label: s.title, value: s.slug }))
 ])
 
@@ -268,4 +267,3 @@ async function onSubmit(_event: FormSubmitEvent<any>) {
     </UCard>
   </UContainer>
 </template>
-
