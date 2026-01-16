@@ -15,8 +15,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      contactPhone: '+7 (999) 000-00-00',
-      contactTelegramUrl: 'https://t.me/your_username'
+      contactPhone: '+48 505 243 582',
+      contactTelegramUrl: 'https://t.me/harnke'
     }
   }
 })
