@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model ServiceRequest {
+  id               String   @id @default(uuid()) @db.VarChar(36)
+  createdAt        DateTime @default(now())
+  status           String   @default("new") @db.VarChar(24)
+  name             String?  @db.VarChar(80)
+  model            String   @db.VarChar(120)
+  serviceSlug      String?  @db.VarChar(80)
+  issue            String   @db.Text
+  comment          String?  @db.Text
+  email            String?  @db.VarChar(120)
+  phone            String?  @db.VarChar(60)
+  telegram         String?  @db.VarChar(80)
+  contact          String   @db.VarChar(240)
+  preferredContact String?  @db.VarChar(24)
+  urgency          String?  @db.VarChar(24)
+
+  @@index([createdAt])
+}

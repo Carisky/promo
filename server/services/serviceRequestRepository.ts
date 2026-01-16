@@ -1,4 +1,6 @@
 import type { ServiceRequestInput, ServiceRequestRecord } from '~/shared/service-request'
+import type { ServiceRequest as ServiceRequestRow } from '@prisma/client'
+import { getPrisma } from '../utils/prisma'
 
 export type ServiceRequestRepository = {
   create: (input: ServiceRequestInput) => Promise<ServiceRequestRecord>
@@ -6,41 +8,59 @@ export type ServiceRequestRepository = {
   getById: (id: string) => Promise<ServiceRequestRecord | null>
 }
 
-function getStore(): ServiceRequestRecord[] {
-  const key = '__promo_service_requests__'
-  const g = globalThis as unknown as Record<string, unknown>
-
-  if (!Array.isArray(g[key])) {
-    g[key] = []
+function toRecord(row: ServiceRequestRow): ServiceRequestRecord {
+  return {
+    id: row.id,
+    createdAt: row.createdAt.toISOString(),
+    status: (row.status as ServiceRequestRecord['status']) ?? 'new',
+    model: row.model,
+    issue: row.issue,
+    contact: row.contact,
+    name: row.name ?? undefined,
+    serviceSlug: row.serviceSlug ?? undefined,
+    comment: row.comment ?? undefined,
+    email: row.email ?? undefined,
+    phone: row.phone ?? undefined,
+    telegram: row.telegram ?? undefined,
+    preferredContact: (row.preferredContact as ServiceRequestInput['preferredContact']) ?? undefined,
+    urgency: (row.urgency as ServiceRequestInput['urgency']) ?? undefined
   }
-
-  return g[key] as ServiceRequestRecord[]
 }
 
 export function getServiceRequestRepository(): ServiceRequestRepository {
   return {
     async create(input) {
-      const id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`
-      const record: ServiceRequestRecord = {
-        ...input,
-        id,
-        createdAt: new Date().toISOString(),
-        status: 'new'
-      }
+      const prisma = getPrisma()
+      const created = await prisma.serviceRequest.create({
+        data: {
+          status: 'new',
+          name: input.name ?? null,
+          model: input.model,
+          serviceSlug: input.serviceSlug ?? null,
+          issue: input.issue,
+          comment: input.comment ?? null,
+          email: input.email ?? null,
+          phone: input.phone ?? null,
+          telegram: input.telegram ?? null,
+          contact: input.contact,
+          preferredContact: input.preferredContact ?? null,
+          urgency: input.urgency ?? null
+        }
+      })
 
-      // TODO(db): заменить на запись в БД (например Prisma/SQLite/Postgres).
-      // Интерфейс репозитория оставлен специально, чтобы заменить реализацию без изменения API/формы.
-      getStore().unshift(record)
-
-      return record
+      return toRecord(created)
     },
 
     async list() {
-      return getStore()
+      const prisma = getPrisma()
+      const rows = await prisma.serviceRequest.findMany({ orderBy: { createdAt: 'desc' } })
+      return rows.map(toRecord)
     },
 
     async getById(id) {
-      return getStore().find(r => r.id === id) ?? null
+      const prisma = getPrisma()
+      const row = await prisma.serviceRequest.findUnique({ where: { id } })
+      return row ? toRecord(row) : null
     }
   }
 }
